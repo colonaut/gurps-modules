@@ -1,12 +1,39 @@
 {
-  "name": "modules",
+  "name": "character_app",
   "version": "0.0.1",
-  "description": "TBD",
-  "main": "index.js",
+  "description": "gurps character ",
+  "keywords": [
+    "gurps",
+    "character"
+  ],
+  "author": "kalle <kalle.linsenboll@cleverbridge.com>",
+  "homepage": "https://github.com/colonaut/gurps-modules#readme",
+  "license": "MIT",
+  "main": "lib/character_app.js",
   "directories": {
-    "test": "test"
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/colonaut/gurps-modules.git"
+  },
+  "scripts": {
+    "start": "cross-env NODE_ENV=development webpack-dev-server --open --config webpack.dev.js",
+    "test": "cross-env NODE_ENV=test jest",
+    "build": "echo \"Error: run build from root\" && exit 1",
+    "docs": "jsdoc2md src/**/*.js > API.md"
+  },
+  "bugs": {
+    "url": "https://github.com/colonaut/gurps-modules/issues"
   },
   "devDependencies": {
+    "cross-env": "^5.2.0",
+    "jsdoc-to-markdown": "^4.0.1",
+    "jest": "^23.6.0",
     "@babel/cli": "^7.2.0",
     "@babel/core": "^7.2.0",
     "@babel/preset-env": "^7.2.0",
@@ -34,8 +61,6 @@
     "graphql": "^14.0.2",
     "graphql-tag": "^2.10.0",
     "graphql-tools": "^4.0.3",
-    "jest": "^23.6.0",
-    "jsdoc-to-markdown": "^4.0.1",
     "jsdom": "13.0.0",
     "polished": "^2.3.3",
     "prop-types": "^15.6.0",
@@ -49,22 +74,5 @@
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.10",
     "webpack-merge": "^4.1.5"
-  },
-  "dependencies": {
-    "lerna": "^3.9.0",
-    "npm": "^6.5.0"
-  },
-  "scripts": {
-    "start": "cross-env NODE_ENV=development webpack-dev-server --open --config webpack.dev.js",
-    "test": "cross-env NODE_ENV=test jest"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@git.cgn.cleverbridge.com:ecommerce-frontend/modules.git"
-  },
-  "keywords": [
-    "tbd"
-  ],
-  "author": "kalle",
-  "license": "MIT"
+  }
 }
