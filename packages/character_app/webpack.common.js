@@ -8,6 +8,10 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'src/public')
   },
+  node: {
+    dns: 'mock',
+    net: 'mock'
+  },
   module: {
     rules: [
       {

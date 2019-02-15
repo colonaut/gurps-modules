@@ -1,0 +1,17 @@
+query($expression:String!) {
+  viewer {
+    login
+    name
+    repository(name: "gurps.data.json") {
+      id
+      descriptionHTML
+      object(expression: $expression) {
+        id
+        ... on Blob {
+          text
+          byteSize
+        }
+      }
+    }
+  }
+}
