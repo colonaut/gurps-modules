@@ -2,49 +2,11 @@
 const fs = require('fs');
 const path = require('path');
 
-//analyze command
-const available_repo_packages = fs.readdirSync(path.join(__dirname, '../packages'), 'utf8')
-    .filter((name) => fs.lstatSync(path.join(__dirname, '../packages', name)).isDirectory());
-const [, , ...args] = process.argv;
-const scope = [], flags = [], unknown = [];
-let is_scope = false;
-for (let i = 0; i < args.length; i++) {
-
-    if (args[i] === '--help' || args[i] === '-h')
-        return showHelp();
-
-    if (args[i] === '--scope') {
-        is_scope = true;
-        continue;
-    }
-
-    if (args[i].startsWith('-')) {
-        flags.push(args[i]);
-        is_scope = false;
-        continue;
-    }
-
-    if (is_scope) {
-        scope.push(args[i]);
-        continue;
-    }
-
-    unknown.push(args[i])
-}
-
-
 //workers
-const showHelp = () => {
-    console.log(`Usage: node .bin/setup.js
-  --help/-h show this help
-  --scope define the packages to setup
-  -g gracefully preserve existing
-  -f force overwrite (default)`);
-};
-const packageJson = (dir, package_name, callback) => {
-    const pkg_file_path = path.join(dir, 'package.json');
+const packageJson = (package_path, package_name, callback) => {
+    const pkg_file_path = path.join(package_path, 'package.json');
     const pkg = require(pkg_file_path);
-    let pkg_file_data = JSON.stringify(pkg);
+    //let pkg_file_data = JSON.stringify(pkg);
     try {
         const devDependencies = {
             "cross-env": "^5.2.0",
@@ -62,12 +24,12 @@ const packageJson = (dir, package_name, callback) => {
         pkg.scripts = Object.assign(pkg.scripts || {}, scripts);
         pkg.devDependencies = Object.assign(pkg.devDependencies || {}, devDependencies);
         pkg.license = 'MIT';
-        pkg_file_data = JSON.stringify(pkg, null, 2);
+        //pkg_file_data = JSON.stringify(pkg, null, 2);
     } catch (err) {
         return callback(err);
     }
 
-    fs.writeFile(pkg_file_path, pkg_file_data, (err) => {
+    fs.writeFile(pkg_file_path, JSON.stringify(pkg, null, 2), (err) => {
         if (err)
             callback(err);
 
@@ -172,60 +134,61 @@ describe('NO TESTS HERE!', () => {
 
 
 };
+const showHelp = () => {
+    console.log(`Usage: node bin/setup.js [path_to_package [, path_to_package, ...]]
+  --help/--h show this help
+  --grace/--g gracefully preserve existing
+  --force/--f force overwrite (default)`);
+};
 
-//wrong flags
-if (unknown.length) {
-    console.error(`Unknown flag "${unknown[0]}"`);
+//analyze command
+const argv = require('yargs').argv;
+if (argv.h || argv.help)
     return showHelp();
-}
 
+return fs.readdir(path.join(__dirname, '../packages'), 'utf8', (err, packages_contents) => {
+    if (err)
+        return console.log(err);
 
-//check command
-let work_packages = [].concat(scope);
-if (scope.length === 0)
-    work_packages = [].concat(available_repo_packages);
+    packages_contents.filter((package_name) => {
+        return argv._.length === 0 || argv._.indexOf(package_name) > -1;
+    }).map((package_name) => {
+        const dir_path = path.join(__dirname, '../packages', package_name);
+        if (fs.lstatSync(dir_path).isDirectory())
+            return {
+                name: package_name,
+                path: dir_path
+            }
+    }).forEach((pkg) => {
+        console.log(`Setup "${pkg.name}" in "${pkg.path}"`);
 
-console.log(`Bootstrapping ${work_packages.length} Packages:`, work_packages);
+        babelConfig(pkg.path, (err, res) => {
+            console.log(pkg.path, '-> add babel.config.js');
+            if (err)
+                console.error(err);
 
-work_packages.forEach((package_name, index) => {
-    const dir = path.join(__dirname, '../packages', package_name);
-    //console.log('-> work dir:', dir);
-    if (available_repo_packages.indexOf(package_name) === -1)
-        return console.error(package_name, 'Error:', 'package does not exist\n');
+            return console.log(res);
+        });
+        jestConfig(pkg.path, (err, res) => {
+            console.log(pkg.path, '-> add jest.config.js');
+            if (err)
+                console.error(err);
 
-    babelConfig(dir, (err, res) => {
-        console.log(package_name, '-> add babel.config.js');
-        if (err)
-            console.error(err);
+            return console.log(res);
+        });
+        structureSetup(pkg.path, pkg.name, (err, res) => {
+            console.log(pkg.path, '-> test setup');
+            if (err)
+                console.error(err);
 
-        return console.log(res);
-    });
+            return console.log(res);
+        });
+        packageJson(pkg.path, pkg.name, (err, res) => {
+            console.log(pkg.path, '-> update package.json');
+            if (err)
+                console.error(err);
 
-    jestConfig(dir, (err, res) => {
-        console.log(package_name, '-> add jest.config.js');
-        if (err)
-            console.error(err);
-
-        return console.log(res);
-    });
-
-    structureSetup(dir, package_name, (err, res) => {
-        console.log(package_name, '-> test setup');
-        if (err)
-            console.error(err);
-
-        return console.log(res);
-    });
-
-    packageJson(dir, package_name, (err, res) => {
-        console.log(package_name, '-> update package.json');
-        if (err)
-            console.error(err);
-
-        return console.log(res);
+            return console.log(res);
+        });
     });
 });
-
-//TODO: webpack stuff when --app and stuff
-
-
