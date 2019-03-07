@@ -21,12 +21,12 @@ export const mocks = {
     Quote: () => ({
         data: () => faker.lorem.sentence(),
         author: () => faker.name
-
     })
 };
 
 const schema = makeExecutableSchema({typeDefs});
 addMockFunctionsToSchema({schema, mocks});
+
 export const link = new ApolloLink(operation => {
     const {query, operationName, variables} = operation;
     return new Observable(observer =>
