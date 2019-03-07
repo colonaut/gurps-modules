@@ -7,6 +7,8 @@ const packageJson = (package_path, package_name, callback) => {
     const pkg_file_path = path.join(package_path, 'package.json');
     const pkg = require(pkg_file_path);
     //let pkg_file_data = JSON.stringify(pkg);
+    const result = [];
+
     try {
         const devDependencies = {
             "cross-env": "^5.2.0",
@@ -18,6 +20,14 @@ const packageJson = (package_path, package_name, callback) => {
             test: "cross-env NODE_ENV=test jest",
             docs: "jsdoc2md src/**/*.js > API.md"
         };
+
+        if (package_name.endsWith('app')) {
+            result.push('app repo, added start script');
+            Object.assign(scripts, {
+                start: "webpack-dev-server --open --config webpack.dev.js"
+            });
+        }
+
         pkg.name = package_name
             .replace(/[A-Z]/, c => c.toLowerCase())
             .replace(/[A-Z]/g, m => "-" + m.toLowerCase());
@@ -33,7 +43,7 @@ const packageJson = (package_path, package_name, callback) => {
         if (err)
             callback(err);
 
-        callback(null, true);
+        return callback(null, result.length ? result : true);
     });
 
 };
@@ -84,6 +94,127 @@ module.exports = {
         return callback(null, result.length ? result : true);
     });
 };
+const webpackConfig = (dir, callback) => {
+    if (!dir.endsWith('app'))
+        return callback('not an app repo, no webpack config added');
+
+    const webpack_common_data = `const path = require('path');
+
+module.exports = {
+  entry: {
+    app: './src/index.js'
+  },
+  output: {
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'public')
+  },
+  module: {
+    rules: [
+      {
+        test: /\\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ['@babel/preset-env', '@babel/preset-react']
+          }
+        }
+      },
+      {
+        test:/\\.css$/,
+        use:['style-loader','css-loader']
+      }
+    ]
+  }
+};`;
+
+    const webpack_dev_data = `const path = require('path');
+const merge = require('webpack-merge');
+const common = require('./webpack.common.js');
+
+module.exports = merge(common, {
+  mode: 'development',
+  devServer: {
+    contentBase: [path.join(__dirname, 'public')],
+    compress: true,
+    port: 9002
+  }
+});`;
+
+    const webpack_prod_data = `const path = require('path');
+const merge = require('webpack-merge');
+const common = require('./webpack.common.js');
+
+module.exports = merge(common, {
+  mode: 'production'
+});`;
+
+    const pulic_index_data = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>${dir}</title>
+</head>
+
+<body>
+  <h1>${dir}</h1>
+  <div id="app-dev">Placeholder before app.</div>
+  <script src="./bundle.js"></script>
+</body>
+</html>`;
+
+    const result = [];
+    const errors = [];
+
+    return fs.mkdir(dir, (err) => {
+        if (err && err.code === 'EEXIST')
+            result.push('src directory already exists');
+        else if (err)
+            errors.push(err);
+
+        fs.mkdir(path.join(dir, 'public'), (err) => {
+            if (err && err.code === 'EEXIST')
+                result.push('src directory already exists');
+            else if (err)
+                errors.push(err);
+
+            fs.writeFile(path.join(dir, 'public', 'index.html'), pulic_index_data, {flag: 'wx'}, (err) => {
+                if (err && err.code === 'EEXIST')
+                    result.push('webpack.common.js already exists');
+                else if (err)
+                    errors.push(err);
+            });
+        });
+
+        fs.writeFile(path.join(dir, 'webpack.common.js'), webpack_common_data, {flag: 'wx'}, (err) => {
+            if (err && err.code === 'EEXIST')
+                result.push('webpack.common.js already exists');
+            else if (err)
+                errors.push(err);
+
+            fs.writeFile(path.join(dir, 'webpack.dev.js'), webpack_dev_data, {flag: 'wx'}, (err) => {
+                if (err && err.code === 'EEXIST')
+                    result.push('webpack.dev.js already exists');
+                else if (err)
+                    errors.push(err);
+
+                fs.writeFile(path.join(dir, 'webpack.prod.js'), webpack_prod_data, {flag: 'wx'}, (err) => {
+                    if (err && err.code === 'EEXIST')
+                        result.push('webpack.prod.js already exists');
+                    else if (err)
+                        errors.push(err);
+
+                    if (errors.length)
+                        return callback(errors);
+
+                    return callback(null, result.length ? result : true);
+                });
+            });
+
+        });
+    });
+};
 const structureSetup = (dir, package_name, callback) => {
     const src_file_path = path.join(dir, 'src');
 
@@ -123,17 +254,17 @@ describe('NO TESTS HERE!', () => {
                 else if (err)
                     errors.push(err);
 
+
                 if (errors.length)
                     return callback(errors);
 
                 return callback(null, result.length ? result : true);
             });
-
         });
     });
 
-
 };
+
 const showHelp = () => {
     console.log(`Usage: node bin/setup.js [path_to_package [, path_to_package, ...]]
   --help/--h show this help
@@ -178,6 +309,13 @@ return fs.readdir(path.join(__dirname, '../packages'), 'utf8', (err, packages_co
         });
         structureSetup(pkg.path, pkg.name, (err, res) => {
             console.log(pkg.path, '-> test setup');
+            if (err)
+                console.error(err);
+
+            return console.log(res);
+        });
+        webpackConfig(pkg.path, (err, res) => {
+            console.log(pkg.path, '-> webpack config');
             if (err)
                 console.error(err);
 

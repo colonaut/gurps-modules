@@ -22,7 +22,7 @@
     "url": "git+https://github.com/colonaut/gurps-modules.git"
   },
   "scripts": {
-    "start": "cross-env NODE_ENV=development webpack-dev-server --open --config webpack.dev.js",
+    "start": "webpack-dev-server --open --config webpack.dev.js",
     "test": "cross-env NODE_ENV=test jest",
     "build": "echo \"Error: run build from root\" && exit 1",
     "docs": "jsdoc2md src/**/*.js > API.md"

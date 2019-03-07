@@ -1,17 +1,15 @@
 {
-  "name": "history-app",
+  "name": "random-quote-app",
   "version": "0.0.1",
-  "description": "history timeline historical events",
+  "description": "daily tips read edit",
   "keywords": [
-    "history",
-    "timeline",
-    "historical",
-    "events"
+    "tip",
+    "daily"
   ],
   "author": "kalle <kalle.linsenboll@cleverbridge.com>",
   "homepage": "https://github.com/colonaut/gurps-modules#readme",
   "license": "MIT",
-  "main": "lib/history-app.js",
+  "main": "lib/daily-tipp-app.js",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -34,7 +32,8 @@
   },
   "devDependencies": {
     "cross-env": "^5.2.0",
-    "jsdoc-to-markdown": "^4.0.1",
-    "jest": "^23.6.0"
+    "graphql": "^14.1.1",
+    "jest": "^23.6.0",
+    "jsdoc-to-markdown": "^4.0.1"
   }
 }

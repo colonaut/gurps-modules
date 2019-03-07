@@ -1,3 +1,9 @@
 'use strict';
+import React from 'react'
+import ReactDOM from 'react-dom';
 
-export default () => 'Hello Example World!';
+const App = () => <div>
+    Hello Random
+</div>;
+
+ReactDOM.render(<App />, document.getElementById('app-dev'));
