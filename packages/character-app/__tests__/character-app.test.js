@@ -2,6 +2,6 @@
 
 const characterApp = require('..');
 
-describe('character_app', () => {
+describe('character-app', () => {
     it('needs tests');
 });
