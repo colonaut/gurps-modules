@@ -38,9 +38,12 @@ const App = () => <ApolloProvider client={client}>
             const advantages = data.allAdvantages;
 
             return (
-                <div>
-                    {advantages.toString()}
-                </div>
+                <ul>
+                    {advantages.map((a) => <li>
+                            {a.name} ({a.cost.join()})
+                        {(a.source_books || []).join()}
+                    </li>)}
+                </ul>
             );
         }}
     </Query>
