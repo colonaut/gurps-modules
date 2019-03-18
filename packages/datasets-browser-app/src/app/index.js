@@ -4,6 +4,7 @@ import {InMemoryCache} from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import {ApolloProvider} from 'react-apollo';
 import {Query} from "react-apollo";
+import propTypes from 'prop-types';
 import fetch from 'unfetch';
 import gql from "graphql-tag";
 import graphql from 'graphql-tag';
@@ -21,9 +22,9 @@ const client = new ApolloClient({
     cache: new InMemoryCache()
 });
 
-const allAdvantages = gql`
+const allAdvantages = gql`query Advantages($page: Int, $perPage: Int)
     {
-        allAdvantages(page: 0, perPage: 10) {
+        allAdvantages(page: $page, perPage: $perPage) {
             name
             cost
             source_books
@@ -31,23 +32,53 @@ const allAdvantages = gql`
     }
 `;
 
-const withAdvantagesQuery = (Component) =>
-class extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return <Query query={allAdvantages}>
+/**
+ *
+ * @param Component
+ * @return {function({page?: *, perPage?: *}): *}
+ */
+const withQuery = (Component) => {
+    const WithQuery = ({query, page, perPage}) => {
+        console.log(page, perPage);
+        return <Query query={query}
+                      variables={{
+                          page: page,
+                          perPage: perPage
+                      }}>
             {({loading, error, data, fetchMore}) => {
                 if (loading) return "Loading...";
                 if (error) return `Error! ${error.message}`;
 
-                console.log(fetchMore)
+                //console.log(fetchMore);
+
+                console.log('', data.count);
+
+
+                const handleLoadMore = () => {
+                    fetchMore({
+                        variables: {
+                            cursor: ''
+                        },
+                    })
+                };
+
                 return <Component data={data} fetchMore={fetchMore}/>;
             }}
         </Query>
     };
+
+    WithQuery.propTypes = {
+        query: propTypes.object.isRequired,
+        perPage: propTypes.number,
+        page: propTypes.number
+    };
+
+    WithQuery.defaultProps = {
+        perPage: 5,
+        page: 0
+    };
+
+    return WithQuery;
 };
 
 
@@ -58,14 +89,12 @@ const AdvantageList = ({data: {allAdvantages}}) => <List>
         secondaryText={`Cost: ${a.cost.join('/')} | Source: ${(a.source_books || ['-']).join(',')}`}
     />)}
 </List>;
-
-
-const Foo = withAdvantagesQuery(AdvantageList);
+const AdvantageListWithData = withQuery(AdvantageList);
 
 const App = () => <MuiThemeProvider>
-        <ApolloProvider client={client}>
-            <Foo/>
-        </ApolloProvider>
+    <ApolloProvider client={client}>
+        <AdvantageListWithData query={allAdvantages}/>
+    </ApolloProvider>
 </MuiThemeProvider>;
 
 
