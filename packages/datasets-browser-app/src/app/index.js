@@ -49,19 +49,6 @@ const withData = (Component) => {
                 if (loading) return "Loading...";
                 if (error) return `Error! ${error.message}`;
 
-                //console.log(fetchMore);
-
-                console.log('', data.count);
-
-
-                const handleLoadMore = () => {
-                    fetchMore({
-                        variables: {
-                            cursor: ''
-                        },
-                    })
-                };
-
                 return <Component data={data} fetchMore={fetchMore}/>;
             }}
         </Query>
@@ -82,16 +69,36 @@ const withData = (Component) => {
 };
 
 
-const AdvantageList = ({data: {allAdvantages}}) => <List>
-    {allAdvantages.map((a, i) => <ListItem
-        key={`allAdvantages_${i}`}
-        primaryText={a.name}
-        secondaryText={`Cost: ${a.cost.join('/')} | Source: ${(a.source_books || ['-']).join(',')}`}
-    />)}
-</List>;
-const AdvantageListWithData = withData(AdvantageList);
-console.log(AdvantageListWithData.propTypes);
+const AdvantageList = ({data: {allAdvantages}, fetchMore: fetchMore}) => {
+    const handleLoadMore = () => {
+        fetchMore({
+            variables: {
+                page: 1,
+                perPage: 5
+            },
+            updateQuery: (previousResult, {fetchMoreResult}) => {
+                console.log(previousResult);
+                console.log(fetchMoreResult);
+                return Object.assign({}, previousResult, {
+                    allAdvantages: [...previousResult.allAdvantages, ...fetchMoreResult.allAdvantages]
+                });
+            }
 
+        })
+    };
+
+    return <div><List>
+        {allAdvantages.map((a, i) => <ListItem
+            key={`allAdvantages_${i}`}
+            primaryText={a.name}
+            secondaryText={`Cost: ${a.cost.join('/')} | Source: ${(a.source_books || ['-']).join(',')}`}
+        />)}
+    </List>
+        <button onClick={handleLoadMore}>???</button>
+    </div>
+};
+
+const AdvantageListWithData = withData(AdvantageList);
 const App = () => <MuiThemeProvider>
     <ApolloProvider client={client}>
         <AdvantageListWithData query={allAdvantages}/>
@@ -99,27 +106,5 @@ const App = () => <MuiThemeProvider>
 </MuiThemeProvider>;
 
 
-const App_ = () => <MuiThemeProvider>
-    <ApolloProvider client={client}>
-        <Query query={allAdvantages}>
-            {({loading, error, data}) => {
-                if (loading) return "Loading...";
-                if (error) return `Error! ${error.message}`;
-
-                const advantages = data.allAdvantages;
-
-                return (
-                    <List>
-                        {advantages.map((a, i) => <ListItem
-                            key={`allAdvantages_${i}`}
-                            primaryText={a.name}
-                            secondaryText={`Cost: ${a.cost.join('/')} | Source: ${(a.source_books || ['-']).join(',')}`}
-                        />)}
-                    </List>
-                );
-            }}
-        </Query>
-    </ApolloProvider>
-</MuiThemeProvider>;
 
 export default App;
