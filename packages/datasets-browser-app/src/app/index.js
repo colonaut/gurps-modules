@@ -37,8 +37,8 @@ const allAdvantages = gql`query Advantages($page: Int, $perPage: Int)
  * @param Component
  * @return {function({page?: *, perPage?: *}): *}
  */
-const withQuery = (Component) => {
-    const WithQuery = ({query, page, perPage}) => {
+const withData = (Component) => {
+    const WrappedComponent = ({query, page, perPage}) => {
         console.log(page, perPage);
         return <Query query={query}
                       variables={{
@@ -67,18 +67,18 @@ const withQuery = (Component) => {
         </Query>
     };
 
-    WithQuery.propTypes = {
+    WrappedComponent.propTypes = {
         query: propTypes.object.isRequired,
         perPage: propTypes.number,
         page: propTypes.number
     };
 
-    WithQuery.defaultProps = {
+    WrappedComponent.defaultProps = {
         perPage: 5,
         page: 0
     };
 
-    return WithQuery;
+    return WrappedComponent;
 };
 
 
@@ -89,7 +89,8 @@ const AdvantageList = ({data: {allAdvantages}}) => <List>
         secondaryText={`Cost: ${a.cost.join('/')} | Source: ${(a.source_books || ['-']).join(',')}`}
     />)}
 </List>;
-const AdvantageListWithData = withQuery(AdvantageList);
+const AdvantageListWithData = withData(AdvantageList);
+console.log(AdvantageListWithData.propTypes);
 
 const App = () => <MuiThemeProvider>
     <ApolloProvider client={client}>
