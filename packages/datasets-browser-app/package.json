@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "cross-env": "^5.2.0",
-    "jsdoc-to-markdown": "^4.0.1",
-    "jest": "^23.6.0"
+    "jest": "^23.6.0",
+    "jsdoc-to-markdown": "^4.0.1"
   }
 }
