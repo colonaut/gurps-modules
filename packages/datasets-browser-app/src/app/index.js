@@ -70,6 +70,7 @@ const withData = (Component) => {
 
 
 const AdvantageList = ({data: {allAdvantages}, fetchMore: fetchMore}) => {
+
     const handleLoadMore = () => {
         fetchMore({
             variables: {
@@ -77,8 +78,6 @@ const AdvantageList = ({data: {allAdvantages}, fetchMore: fetchMore}) => {
                 perPage: 5
             },
             updateQuery: (previousResult, {fetchMoreResult}) => {
-                console.log(previousResult);
-                console.log(fetchMoreResult);
                 return Object.assign({}, previousResult, {
                     allAdvantages: [...previousResult.allAdvantages, ...fetchMoreResult.allAdvantages]
                 });
