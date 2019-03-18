@@ -1,0 +1,43 @@
+{
+  "name": "datasets-browser-app",
+  "version": "0.0.1",
+  "description": "browse gurps data sets",
+  "keywords": [
+    "gurps",
+    "dataset",
+    "advantages",
+    "quirks",
+    "disadvantages",
+    "skills",
+    "equipment"
+  ],
+  "author": "kalle <kalle.linsenboll@cleverbridge.com>",
+  "homepage": "https://github.com/colonaut/gurps-modules#readme",
+  "license": "MIT",
+  "main": "lib/datasets-browser-app.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/colonaut/gurps-modules.git"
+  },
+  "scripts": {
+    "test": "cross-env NODE_ENV=test jest",
+    "build": "echo \"Error: run build from root\" && exit 1",
+    "docs": "jsdoc2md src/**/*.js > API.md",
+    "start": "webpack-dev-server --open --config webpack.dev.js"
+  },
+  "bugs": {
+    "url": "https://github.com/colonaut/gurps-modules/issues"
+  },
+  "devDependencies": {
+    "cross-env": "^5.2.0",
+    "jest": "^23.6.0",
+    "jsdoc-to-markdown": "^4.0.1"
+  }
+}

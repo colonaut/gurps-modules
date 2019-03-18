@@ -1,10 +1,34 @@
 {
-  "name": "modules",
+  "name": "character-app",
   "version": "0.0.1",
-  "description": "TBD",
-  "main": "index.js",
+  "description": "gurps character ",
+  "keywords": [
+    "gurps",
+    "character"
+  ],
+  "author": "kalle <kalle.linsenboll@cleverbridge.com>",
+  "homepage": "https://github.com/colonaut/gurps-modules#readme",
+  "license": "MIT",
+  "main": "lib/character_app.js",
   "directories": {
-    "test": "test"
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/colonaut/gurps-modules.git"
+  },
+  "scripts": {
+    "start": "webpack-dev-server --open --config webpack.dev.js",
+    "test": "cross-env NODE_ENV=test jest",
+    "build": "echo \"Error: run build from root\" && exit 1",
+    "docs": "jsdoc2md src/**/*.js > API.md"
+  },
+  "bugs": {
+    "url": "https://github.com/colonaut/gurps-modules/issues"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.0",
@@ -12,11 +36,9 @@
     "@babel/preset-env": "^7.2.0",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-stage-0": "^7.0.0",
-    "@babel/preset-stage-1": "^7.0.0",
     "@types/jest": "^22.1.0",
     "apollo-cache-inmemory": "^1.3.12",
     "apollo-client": "^2.4.8",
-    "apollo-link": "^1.2.9",
     "apollo-link-http": "^1.5.9",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^9.0.0",
@@ -33,6 +55,7 @@
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.6.0",
     "faker": "^4.1.0",
+    "github-api": "^3.0.0",
     "graphql": "^14.0.2",
     "graphql-tag": "^2.10.0",
     "graphql-tools": "^4.0.3",
@@ -53,21 +76,7 @@
     "webpack-merge": "^4.2.1"
   },
   "dependencies": {
-    "lerna": "^3.9.0",
-    "material-ui": "^0.20.2",
-    "npm": "^6.5.0"
-  },
-  "scripts": {
-    "start": "cross-env NODE_ENV=development webpack-dev-server --open --config webpack.dev.js",
-    "test": "cross-env NODE_ENV=test jest"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@git.cgn.cleverbridge.com:ecommerce-frontend/modules.git"
-  },
-  "keywords": [
-    "tbd"
-  ],
-  "author": "kalle",
-  "license": "MIT"
+    "axios": "^0.18.0",
+    "fetch": "^1.1.0"
+  }
 }
