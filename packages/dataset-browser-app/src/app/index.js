@@ -22,12 +22,25 @@ const client = new ApolloClient({
     cache: new InMemoryCache()
 });
 
-const allAdvantages = gql`query Advantages($page: Int, $perPage: Int)
+const allAdvantages = gql`
+    query Advantages($page: Int, $perPage: Int)
     {
         allAdvantages(page: $page, perPage: $perPage) {
+            id
             name
             cost
             source_books
+        }
+    }`;
+
+const advantageById = gql`
+    query Advantage($id: ID!)
+    {
+        Advantage(id: $id){
+            name
+            cost
+            source_books
+            description
         }
     }
 `;
@@ -35,16 +48,48 @@ const allAdvantages = gql`query Advantages($page: Int, $perPage: Int)
 /**
  *
  * @param Component
- * @return {function({page?: *, perPage?: *}): *}
+ * @returns {function({query: *, id?: *}): *}
  */
 const withData = (Component) => {
+    const WrappedComponent = ({query, id}) => {
+        console.log(id);
+        return <Query query={query}
+                      variables={{
+                          id: id
+                      }}
+                      skip={!id}
+        >
+            {({loading, error, data, refetch}) => {
+                if (loading) return null;
+                if (error) return `Error!: ${error}`;
+
+                return <Component data={data} refetch={refetch}/>;
+            }}
+        </Query>
+    };
+
+    WrappedComponent.propTypes = {
+        query: propTypes.object.isRequired,
+        id: propTypes.string.isRequired
+    };
+
+    return WrappedComponent;
+};
+
+/**
+ *
+ * @param Component
+ * @return {function({page?: *, perPage?: *}): *}
+ */
+const withDataList = (Component) => {
     const WrappedComponent = ({query, page, perPage}) => {
         console.log(page, perPage);
         return <Query query={query}
                       variables={{
                           page: page,
                           perPage: perPage
-                      }}>
+                      }}
+        >
             {({loading, error, data, fetchMore}) => {
                 if (loading) return "Loading...";
                 if (error) return `Error! ${error.message}`;
@@ -69,8 +114,20 @@ const withData = (Component) => {
 };
 
 
-const AdvantageList = ({data: {allAdvantages}, fetchMore: fetchMore}) => {
+const Advantage = ({data: {advantageById}, refetch: refetch}) => {
+    const handleReload = () => {
+        console.log('handleReload');
+    };
 
+    return <div>
+        <div>
+            Hallo?
+        </div>
+        <button onClick={handleReload}>???</button>
+    </div>
+};
+
+const AdvantageList = ({data: {allAdvantages}, fetchMore: fetchMore}) => {
     const handleLoadMore = () => {
         fetchMore({
             variables: {
@@ -86,24 +143,28 @@ const AdvantageList = ({data: {allAdvantages}, fetchMore: fetchMore}) => {
         })
     };
 
-    return <div><List>
-        {allAdvantages.map((a, i) => <ListItem
-            key={`allAdvantages_${i}`}
-            primaryText={a.name}
-            secondaryText={`Cost: ${a.cost.join('/')} | Source: ${(a.source_books || ['-']).join(',')}`}
-        />)}
-    </List>
+    return <div>
+        <List>
+            {allAdvantages.map((a, i) => <ListItem
+                key={`allAdvantages_${i}`}
+                primaryText={a.name}
+                secondaryText={`Cost: ${a.cost.join('/')} | Source: ${(a.source_books || ['-']).join(',')}`}
+            />)}
+        </List>
         <button onClick={handleLoadMore}>???</button>
     </div>
 };
 
-const AdvantageListWithData = withData(AdvantageList);
+const AdvantageWithData = withData(Advantage); //4174ce20299f7ac7913d7442549a08d9
+const AdvantageListWithData = withDataList(AdvantageList);
+
+
 const App = () => <MuiThemeProvider>
     <ApolloProvider client={client}>
+        <AdvantageWithData query={advantageById} id={'4174ce20299f7ac7913d7442549a08d9'}/>
         <AdvantageListWithData query={allAdvantages}/>
     </ApolloProvider>
 </MuiThemeProvider>;
-
 
 
 export default App;
