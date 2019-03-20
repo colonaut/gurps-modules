@@ -48,47 +48,20 @@ const advantageById = gql`
 /**
  *
  * @param Component
- * @returns {function({query: *, id?: *}): *}
- */
-const withData = (Component) => {
-    const WrappedComponent = ({query, id}) => {
-        console.log(id);
-        return <Query query={query}
-                      variables={{
-                          id: id
-                      }}
-                      skip={!id}
-        >
-            {({loading, error, data, refetch}) => {
-                if (loading) return null;
-                if (error) return `Error!: ${error}`;
-
-                return <Component data={data} refetch={refetch}/>;
-            }}
-        </Query>
-    };
-
-    WrappedComponent.propTypes = {
-        query: propTypes.object.isRequired,
-        id: propTypes.string.isRequired
-    };
-
-    return WrappedComponent;
-};
-
-/**
- *
- * @param Component
  * @return {function({page?: *, perPage?: *}): *}
  */
-const withDataList = (Component) => {
-    const WrappedComponent = ({query, page, perPage}) => {
-        console.log(page, perPage);
+const withData = (Component) => {
+    const WrappedComponent = ({query, id, filter, page, perPage}) => {
+        const variables = id ? {id: id} : {
+            page: page,
+            perPage: perPage,
+            filter: filter
+        };
+        if (id)
+            console.warn(`withData(${Component.name}) query: id given, page, perPage and filter ignored: ${page}, ${perPage}, ${filter}`);
+
         return <Query query={query}
-                      variables={{
-                          page: page,
-                          perPage: perPage
-                      }}
+                      variables={variables}
         >
             {({loading, error, data, fetchMore}) => {
                 if (loading) return "Loading...";
@@ -101,11 +74,14 @@ const withDataList = (Component) => {
 
     WrappedComponent.propTypes = {
         query: propTypes.object.isRequired,
+        id: propTypes.string,
+        filter: propTypes.object,
         perPage: propTypes.number,
         page: propTypes.number
     };
 
     WrappedComponent.defaultProps = {
+        filter: {},
         perPage: 5,
         page: 0
     };
@@ -156,7 +132,7 @@ const AdvantageList = ({data: {allAdvantages}, fetchMore: fetchMore}) => {
 };
 
 const AdvantageWithData = withData(Advantage); //4174ce20299f7ac7913d7442549a08d9
-const AdvantageListWithData = withDataList(AdvantageList);
+const AdvantageListWithData = withData(AdvantageList);
 
 
 const App = () => <MuiThemeProvider>

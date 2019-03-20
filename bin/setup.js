@@ -288,10 +288,11 @@ return fs.readdir(path.join(__dirname, '../packages'), 'utf8', (err, packages_co
         if (fs.lstatSync(dir_path).isDirectory())
             return {
                 name: package_name,
-                path: dir_path
+                path: dir_path,
+                type: ['app', 'module', 'utils'].find(v => package_name.toLocaleLowerCase().endsWith(v)) || null
             }
     }).forEach((pkg) => {
-        console.log(`Setup "${pkg.name}" in "${pkg.path}"`);
+        console.log(`Setup [${pkg.type.toUpperCase()}] "${pkg.name}" in "${pkg.path}"`);
 
         babelConfig(pkg.path, (err, res) => {
             console.log(pkg.path, '-> add babel.config.js');
