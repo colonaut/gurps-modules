@@ -23,15 +23,16 @@ const client = new ApolloClient({
 });
 
 const allAdvantages = gql`
-    query Advantages($page: Int, $perPage: Int)
+    query Advantages($page: Int, $perPage: Int, $filter: AdvantageFilter)
     {
-        allAdvantages(page: $page, perPage: $perPage) {
+        allAdvantages(page: $page, perPage: $perPage, filter: $filter) {
             id
             name
             cost
             source_books
         }
-    }`;
+    }
+`;
 
 const advantageById = gql`
     query Advantage($id: ID!)
