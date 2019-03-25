@@ -3,43 +3,47 @@ const fs = require('fs');
 const path = require('path');
 
 //workers
-const packageJson = (package_path, package_name, callback) => {
-    const pkg_file_path = path.join(package_path, 'package.json');
-    const pkg = require(pkg_file_path);
-    //let pkg_file_data = JSON.stringify(pkg);
+const packageJson = (pkg_info, callback) => {
+    const pkg_file_path = path.join(pkg_info.path, 'package.json');
+    const pkg_file = require(pkg_file_path);
+    const root_pkg_file = require(path.join(__dirname, './../package.json'));
     const result = [];
 
     try {
-        const devDependencies = {
-            "cross-env": "^5.2.0",
-            "jsdoc-to-markdown": "^4.0.1",
-            "jest": "^23.6.0"
-        };
+        const devDependencies = {};
+        ['cross-env', 'jsdoc-to-markdown', 'jest'].reduce((acc, v) => {
+            if (root_pkg_file.devDependencies[v])
+                return Object.assign(acc, {
+                    [v]: root_pkg_file.devDependencies[v]
+                });
+
+        }, devDependencies);
+
         const scripts = {
             build: "echo \"Error: run build from root\" && exit 1",
             test: "cross-env NODE_ENV=test jest",
             docs: "jsdoc2md src/**/*.js > API.md"
         };
 
-        if (package_name.endsWith('app')) {
+        if (pkg_info.mode === 'app') {
             result.push('app repo, added start script');
             Object.assign(scripts, {
                 start: "webpack-dev-server --open --config webpack.dev.js"
             });
         }
 
-        pkg.name = package_name
+        pkg_file.name = pkg_info.name
             .replace(/[A-Z]/, c => c.toLowerCase())
             .replace(/[A-Z]/g, m => "-" + m.toLowerCase());
-        pkg.scripts = Object.assign(pkg.scripts || {}, scripts);
-        pkg.devDependencies = Object.assign(pkg.devDependencies || {}, devDependencies);
-        pkg.license = 'MIT';
+        pkg_file.scripts = Object.assign(pkg_file.scripts || {}, scripts);
+        pkg_file.devDependencies = Object.assign(pkg_file.devDependencies || {}, devDependencies);
+        pkg_file.license = 'MIT';
         //pkg_file_data = JSON.stringify(pkg, null, 2);
     } catch (err) {
         return callback(err);
     }
 
-    fs.writeFile(pkg_file_path, JSON.stringify(pkg, null, 2), (err) => {
+    fs.writeFile(pkg_file_path, JSON.stringify(pkg_file, null, 2), (err) => {
         if (err)
             callback(err);
 
@@ -291,39 +295,39 @@ return fs.readdir(path.join(__dirname, '../packages'), 'utf8', (err, packages_co
                 path: dir_path,
                 type: ['app', 'module', 'utils'].find(v => package_name.toLocaleLowerCase().endsWith(v)) || null
             }
-    }).forEach((pkg) => {
-        console.log(`Setup [${pkg.type.toUpperCase()}] "${pkg.name}" in "${pkg.path}"`);
+    }).forEach((pkg_info) => {
+        console.log(`Setup [${pkg_info.type.toUpperCase()}] "${pkg_info.name}" in "${pkg_info.path}"`);
 
-        babelConfig(pkg.path, (err, res) => {
-            console.log(pkg.path, '-> add babel.config.js');
+        babelConfig(pkg_info.path, (err, res) => {
+            console.log(pkg_info.path, '-> add babel.config.js');
             if (err)
                 console.error(err);
 
             return console.log(res);
         });
-        jestConfig(pkg.path, (err, res) => {
-            console.log(pkg.path, '-> add jest.config.js');
+        jestConfig(pkg_info.path, (err, res) => {
+            console.log(pkg_info.path, '-> add jest.config.js');
             if (err)
                 console.error(err);
 
             return console.log(res);
         });
-        structureSetup(pkg.path, pkg.name, (err, res) => {
-            console.log(pkg.path, '-> test setup');
+        structureSetup(pkg_info.path, pkg_info.name, (err, res) => {
+            console.log(pkg_info.path, '-> test setup');
             if (err)
                 console.error(err);
 
             return console.log(res);
         });
-        webpackConfig(pkg.path, (err, res) => {
-            console.log(pkg.path, '-> webpack config');
+        webpackConfig(pkg_info.path, (err, res) => {
+            console.log(pkg_info.path, '-> webpack config');
             if (err)
                 console.error(err);
 
             return console.log(res);
         });
-        packageJson(pkg.path, pkg.name, (err, res) => {
-            console.log(pkg.path, '-> update package.json');
+        packageJson(pkg_info, (err, res) => {
+            console.log(pkg_info.path, '-> update package.json');
             if (err)
                 console.error(err);
 
