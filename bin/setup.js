@@ -293,7 +293,7 @@ return fs.readdir(path.join(__dirname, '../packages'), 'utf8', (err, packages_co
             return {
                 name: package_name,
                 path: dir_path,
-                type: ['app', 'module', 'utils'].find(v => package_name.toLocaleLowerCase().endsWith(v)) || null
+                type: ['app', 'module', 'utils'].find(v => package_name.toLocaleLowerCase().endsWith(v)) || 'unknown'
             }
     }).forEach((pkg_info) => {
         console.log(`Setup [${pkg_info.type.toUpperCase()}] "${pkg_info.name}" in "${pkg_info.path}"`);
