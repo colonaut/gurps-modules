@@ -7,7 +7,9 @@ import {Query} from "react-apollo";
 import propTypes from 'prop-types';
 import fetch from 'unfetch';
 import gql from "graphql-tag";
-import graphql from 'graphql-tag';
+
+import get_advantages from './queries/get_advantage.graphql';
+import get_advantage from './queries/get_advantage.graphql';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {List, ListItem} from 'material-ui/List';
@@ -22,29 +24,6 @@ const client = new ApolloClient({
     cache: new InMemoryCache()
 });
 
-const allAdvantages = gql`
-    query Advantages($page: Int, $perPage: Int, $filter: AdvantageFilter)
-    {
-        allAdvantages(page: $page, perPage: $perPage, filter: $filter) {
-            id
-            name
-            cost
-            source_books
-        }
-    }
-`;
-
-const advantageById = gql`
-    query Advantage($id: ID!)
-    {
-        Advantage(id: $id){
-            name
-            cost
-            source_books
-            description
-        }
-    }
-`;
 
 /**
  *
@@ -138,8 +117,8 @@ const AdvantageListWithData = withData(AdvantageList);
 
 const App = () => <MuiThemeProvider>
     <ApolloProvider client={client}>
-        <AdvantageWithData query={advantageById} id={'4174ce20299f7ac7913d7442549a08d9'}/>
-        <AdvantageListWithData query={allAdvantages}/>
+        <AdvantageWithData query={get_advantage} id={'4174ce20299f7ac7913d7442549a08d9'}/>
+        <AdvantageListWithData query={get_advantages}/>
     </ApolloProvider>
 </MuiThemeProvider>;
 

@@ -34,11 +34,16 @@ const packageJson = (pkg_info, callback) => {
 
         pkg_file.name = pkg_info.name
             .replace(/[A-Z]/, c => c.toLowerCase())
-            .replace(/[A-Z]/g, m => "-" + m.toLowerCase());
+            .replace(/[A-Z]/g, m => "_" + m.toLowerCase());
         pkg_file.scripts = Object.assign(pkg_file.scripts || {}, scripts);
         pkg_file.devDependencies = Object.assign(pkg_file.devDependencies || {}, devDependencies);
         pkg_file.license = 'MIT';
         //pkg_file_data = JSON.stringify(pkg, null, 2);
+
+        result.push(`package name: ${pkg_file.name}`)
+        result.push(`added devDependencies: ${Object.keys(pkg_file.devDependencies)}`);
+        result.push(`added scripts: ${Object.keys(pkg_file.scripts)}`);
+
     } catch (err) {
         return callback(err);
     }
@@ -98,9 +103,11 @@ module.exports = {
         return callback(null, result.length ? result : true);
     });
 };
-const webpackConfig = (dir, callback) => {
-    if (!dir.endsWith('app'))
+const webpackConfig = (pkg_info, callback) => {
+    if (pkg_info.type !== 'app')
         return callback('not an app repo, no webpack config added');
+
+
 
     const webpack_common_data = `const path = require('path');
 
@@ -114,6 +121,11 @@ module.exports = {
   },
   module: {
     rules: [
+       {
+        test: /\\.(graphql|gql)$/,
+        exclude: /node_modules/,
+        loader: 'graphql-tag/loader',
+      },
       {
         test: /\\.js$/,
         exclude: /node_modules/,
@@ -158,11 +170,11 @@ module.exports = merge(common, {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>${dir}</title>
+  <title>${pkg_info.path}</title>
 </head>
 
 <body>
-  <h1>${dir}</h1>
+  <h1>${pkg_info.path}</h1>
   <div id="app-dev">Placeholder before app.</div>
   <script src="./bundle.js"></script>
 </body>
@@ -171,19 +183,19 @@ module.exports = merge(common, {
     const result = [];
     const errors = [];
 
-    return fs.mkdir(dir, (err) => {
+    return fs.mkdir(pkg_info.path, (err) => {
         if (err && err.code === 'EEXIST')
             result.push('src directory already exists');
         else if (err)
             errors.push(err);
 
-        fs.mkdir(path.join(dir, 'public'), (err) => {
+        fs.mkdir(path.join(pkg_info.path, 'public'), (err) => {
             if (err && err.code === 'EEXIST')
                 result.push('src directory already exists');
             else if (err)
                 errors.push(err);
 
-            fs.writeFile(path.join(dir, 'public', 'index.html'), pulic_index_data, {flag: 'wx'}, (err) => {
+            fs.writeFile(path.join(pkg_info.path, 'public', 'index.html'), pulic_index_data, {flag: 'wx'}, (err) => {
                 if (err && err.code === 'EEXIST')
                     result.push('webpack.common.js already exists');
                 else if (err)
@@ -191,19 +203,19 @@ module.exports = merge(common, {
             });
         });
 
-        fs.writeFile(path.join(dir, 'webpack.common.js'), webpack_common_data, {flag: 'wx'}, (err) => {
+        fs.writeFile(path.join(pkg_info.path, 'webpack.common.js'), webpack_common_data, {flag: 'wx'}, (err) => {
             if (err && err.code === 'EEXIST')
                 result.push('webpack.common.js already exists');
             else if (err)
                 errors.push(err);
 
-            fs.writeFile(path.join(dir, 'webpack.dev.js'), webpack_dev_data, {flag: 'wx'}, (err) => {
+            fs.writeFile(path.join(pkg_info.path, 'webpack.dev.js'), webpack_dev_data, {flag: 'wx'}, (err) => {
                 if (err && err.code === 'EEXIST')
                     result.push('webpack.dev.js already exists');
                 else if (err)
                     errors.push(err);
 
-                fs.writeFile(path.join(dir, 'webpack.prod.js'), webpack_prod_data, {flag: 'wx'}, (err) => {
+                fs.writeFile(path.join(pkg_info.path, 'webpack.prod.js'), webpack_prod_data, {flag: 'wx'}, (err) => {
                     if (err && err.code === 'EEXIST')
                         result.push('webpack.prod.js already exists');
                     else if (err)
@@ -296,42 +308,43 @@ return fs.readdir(path.join(__dirname, '../packages'), 'utf8', (err, packages_co
                 type: ['app', 'module', 'utils'].find(v => package_name.toLocaleLowerCase().endsWith(v)) || 'unknown'
             }
     }).forEach((pkg_info) => {
-        console.log(`Setup [${pkg_info.type.toUpperCase()}] "${pkg_info.name}" in "${pkg_info.path}"`);
+        console.log(`Setup [${(pkg_info.type).toUpperCase()}] "${pkg_info.name}" in "${pkg_info.path}"`);
 
         babelConfig(pkg_info.path, (err, res) => {
-            console.log(pkg_info.path, '-> add babel.config.js');
+            console.log(pkg_info.name, '-> add babel.config.js');
             if (err)
                 console.error(err);
 
             return console.log(res);
         });
         jestConfig(pkg_info.path, (err, res) => {
-            console.log(pkg_info.path, '-> add jest.config.js');
+            console.log(pkg_info.name, '-> add jest.config.js');
             if (err)
                 console.error(err);
 
             return console.log(res);
         });
         structureSetup(pkg_info.path, pkg_info.name, (err, res) => {
-            console.log(pkg_info.path, '-> test setup');
+            console.log(pkg_info.name, '-> package structure setup');
             if (err)
                 console.error(err);
 
             return console.log(res);
         });
-        webpackConfig(pkg_info.path, (err, res) => {
-            console.log(pkg_info.path, '-> webpack config');
+        webpackConfig(pkg_info, (err, res) => {
+            console.log(pkg_info.name, '-> webpack config');
             if (err)
                 console.error(err);
 
             return console.log(res);
         });
         packageJson(pkg_info, (err, res) => {
-            console.log(pkg_info.path, '-> update package.json');
+            console.log(pkg_info.name, '-> update package.json');
             if (err)
                 console.error(err);
 
             return console.log(res);
         });
     });
+
 });

@@ -3,14 +3,29 @@ const path = require('path');
 
 //TODO: refactor to use vendor in dev, but only build and deploy actual app code. come up with a clean up after build
 
+const getPackageEntries = () => {
+    return new Promise((resolve, reject) => {
+        fs.readdir(path.join(__dirname, './packages'), 'utf8', (err, package_names) => {
+            if (err)
+                return reject(err);
+
+            const entry = package_names.reduce((acc, v) => {
+                return Object.assign(acc, {
+                    [v]: `./${v}/src/index.js`
+                });
+            }, {
+                //vendor: './../vendor/index.js'
+            });
+
+            return resolve(entry);
+        });
+    });
+};
+
 module.exports = {
     mode: 'development',
     context: path.resolve(__dirname, './packages'),
-    entry: {
-        app: './subscription_overview_app/src/index.js',
-        module: './subscription_overview_module/src/index.js',
-        vendor: './../vendor/index.js' //TODO: all vendor code must go here
-    },
+    entry: () => getPackageEntries(),
     output: {
         path: path.resolve(__dirname, './dist'),
         filename: '[name].bundle.js',
@@ -22,6 +37,11 @@ module.exports = {
     },
     module: {
         rules: [
+            {
+                test: /\.(graphql|gql)$/,
+                exclude: /node_modules/,
+                loader: 'graphql-tag/loader',
+            },
             {
                 test: /\.js$/,
                 loader: "babel-loader",

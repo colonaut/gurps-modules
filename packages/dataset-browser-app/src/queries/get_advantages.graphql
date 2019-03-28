@@ -1,0 +1,9 @@
+query Advantages($page: Int, $perPage: Int, $filter: AdvantageFilter)
+{
+    allAdvantages(page: $page, perPage: $perPage, filter: $filter) {
+        id
+        name
+        cost
+        source_books
+    }
+}

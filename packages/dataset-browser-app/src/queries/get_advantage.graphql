@@ -1,0 +1,9 @@
+query Advantage($id: ID!)
+{
+    Advantage(id: $id){
+        name
+        cost
+        source_books
+        description
+    }
+}
