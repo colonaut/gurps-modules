@@ -1,0 +1,32 @@
+{
+  "name": "with",
+  "version": "0.0.1",
+  "description": "collection of higher order components withXyz for data, style, etc.",
+  "keywords": [
+    "hoc",
+    "with",
+    "data",
+    "style"
+  ],
+  "author": "colonaut <colonaut@gmx.de>",
+  "homepage": "https://github.com/colonaut/gurps-modules#readme",
+  "license": "MIT",
+  "main": "src/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/colonaut/gurps-modules.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/colonaut/gurps-modules/issues"
+  }
+}

@@ -6,14 +6,15 @@ module.exports = {
   },
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'src/public')
-  },
-  node: {
-    dns: 'mock',
-    net: 'mock'
+    path: path.resolve(__dirname, 'public')
   },
   module: {
     rules: [
+      {
+        test: /\.(graphql|gql)$/,
+        exclude: /node_modules/,
+        loader: 'graphql-tag/loader',
+      },
       {
         test: /\.js$/,
         exclude: /node_modules/,

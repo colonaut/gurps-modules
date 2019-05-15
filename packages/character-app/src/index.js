@@ -1,59 +1,73 @@
 'use strict';
 import React from "react";
 import ReactDOM from 'react-dom';
+import {ApolloProvider} from "react-apollo";
+import {HttpLink} from "apollo-link-http";
+import ApolloClient from "apollo-client";
+import {InMemoryCache} from "apollo-cache-inmemory";
+import {withData} from '../../with';
+import GetStats from './queries/get_stats.graphql';
 
-//import axios from 'axios';
-//import fetch from 'fetch';
-import Github from 'github-api';
+const apollo_link = new HttpLink({ //create a HttpLink, this will prevent CORS prob.
+    uri: 'http://localhost:3000/graphql',
+    //fetch: fetch //TODO necc for testing (?) put it into test utils?
+});
+const client = new ApolloClient({
+    link: apollo_link,
+    cache: new InMemoryCache()
+});
 
-const token = 'ee7542898197f3d139aac22811f4c56b63e67d9d';
-const base_64 = 'bXkgbmV3IGZpbGUgY29udGVudHM=';
+const Stat = ({stat}) => {
+    console.log('Stat Component base_value', stat.base_value);
 
-const content = {
-    message: 'my commit message',
-    content: base_64
+    const condition = (x) => {
+        console.log(x);
+        return true;
+    };
+
+    const value = (input) => {
+        if (!isNaN(input))
+            return Number(input);
+
+        /*
+        //remove all whitespaces not in quotes
+        const normalize_regex = /\s+(?=([^"]*"[^"]*")*[^"]*$)/;
+        input = input.replace(/\s+(?=([^"]*"[^"]*")*[^"]*$)/g, '_');
+        console.log('normalized', input);
+        console.log(input.split(/_|\*|\+\-/));
+         */
+
+        const if_then_else = input.split('@if');
+        if (if_then_else.length > 1) { //length > 1 means we have @if, right side must have THEN and ELSE then
+            console.log('-> if_then_else length > 1:', if_then_else);
+            const mapped = if_then_else
+                .filter(x => x.length) //left side could be empty string, so we filter that out before mapping
+                .map(part => {
+                    if (part.indexOf('THEN') > -1)
+                        return new Function(`if(condition('${
+                            part.replace('THEN', `')){return value('`)
+                                .replace('ELSE', `');} else {return value('`)
+                            }');}`);
+
+                    return value(part);
+                });
+
+            console.log('-> mapped', mapped);
+
+        }
+
+
+        return 'TODO';
+    };
+
+    return (<div>
+        {stat.name} -> {value(stat.base_value)}
+    </div>)
 };
 
-const gh = new Github({token: token});
-//const repo = gh.getRepo('colonaut/gurps.data.json', {token: token});
-
-const repo =
-
-repo.listCommits((a, b) => {
-    console.log(a, b);
-});
-
-/*repo.getContents('test.json', true, (a, b) => {
-    console.log(a, b);
-});*/
-
-
-/*
-fetch.fetchUrl('https://api.github.com/repos/colonaut/gurps-data-json/contents/test.json', {
-    method: 'PUT',
-    headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'token ee7542898197f3d139aac22811f4c56b63e67d9d'
-    },
-    payload: content
-}, (err, meta, body) => {
-   console.log(err, meta, body)
-});
-*/
-
-/*axios.put('https://api.github.com/repos/colonaut/gurps-data-json/contents/test.json', content).then((res) => {
-    console.log(res);
-}).catch((err) => {
-    console.log(err);
-});
-
-axios.get('https://api.github.com/repos/colonaut/gurps-data-json/contents/test.json'
-).then(resp => {
-    console.log(resp.data);
-}).catch(err => {
-    console.log(err);
-});*/
-
+const Stats = withData(({data, fetchMore}) => <ul>
+    {data.stats.map((stat, i) => <Stat key={i} stat={stat}/>)}
+</ul>);
 
 
 class App extends React.Component {
@@ -62,9 +76,9 @@ class App extends React.Component {
     }
 
     render() {
-        return (<div>
-            <p>Hello Character</p>
-        </div>);
+        return (<ApolloProvider client={client}>
+            <Stats query={GetStats} perPage={14}/>
+        </ApolloProvider>);
     }
 }
 
