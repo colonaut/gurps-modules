@@ -1,0 +1,38 @@
+query GetCharacters($page: Int!, $perPage: Int!)
+{
+    allCharacters(page: $page, perPage: $perPage) {
+        name
+        user: User {
+            id
+            name
+        }
+        allAdvantages: CharacterAdvantages {
+            id
+            campaign_id
+            advantage: Advantage {
+                id
+                name
+                categories
+                skill_used
+            }
+        }
+        allSkills: CharacterSkills {
+            id
+            skill: Skill {
+                id
+                name
+                skill_type
+                categories
+            }
+        }
+        allEquipment: CharacterEquipmentItems {
+            id
+            equipment: Equipment {
+                id
+                name
+                description
+                categories
+            }
+        }
+    }
+}
