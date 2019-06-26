@@ -13,6 +13,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-stage-0": "^7.0.0",
     "@babel/preset-stage-1": "^7.0.0",
+    "@gurps-graphql/client": "file:../gurps-graphql/packages/client",
     "@types/jest": "^22.1.0",
     "apollo-cache-inmemory": "^1.3.12",
     "apollo-client": "^2.5.1",
