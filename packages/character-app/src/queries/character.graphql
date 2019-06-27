@@ -1,0 +1,15 @@
+query character($id: ID!) {
+  character: Character(id: $id) {
+    name
+    attributes: CharacterAttributes {
+      attribute: Attribute {
+        name
+        position
+        baseValue
+        Dataset{
+          name
+        }
+      }
+    }
+  }
+}

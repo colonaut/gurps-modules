@@ -1,9 +1,0 @@
-query GetStats($page: Int!, $perPage: Int!) {
-  stats: allAttributes(page: $page, perPage: $perPage, filter: {position_gt: 0}) {
-    id
-    name
-    position
-    symbol
-    base_value
-  }
-}
