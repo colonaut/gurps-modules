@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 //const webpack = require('webpack');
 
 //TODO: refactor to use vendor in dev, but only build and deploy actual app code. come up with a clean up after build
