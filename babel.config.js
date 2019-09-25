@@ -33,14 +33,24 @@ module.exports = {
             presets: [
                 ['@babel/preset-env',
                     {
-                        modules: false
-                    }
+                        modules: false //'commonjs'
+                    },
                 ],
-                '@babel/preset-react'
+                '@babel/preset-react',
             ],
             plugins: [
-                'transform-es2015-modules-commonjs'
-            ]
-        }
+                [
+                    '@babel/plugin-transform-runtime',
+                    {
+                        absoluteRuntime: false,
+                        corejs: false,
+                        helpers: false,
+                        regenerator: true,
+                        useESModules: true
+                    }
+                ],
+                '@babel/plugin-proposal-class-properties'
+            ],
+        },
     }
 };

@@ -28,5 +28,11 @@
   },
   "bugs": {
     "url": "https://github.com/colonaut/gurps-modules/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "cross-env": "^6.0.0",
+    "jest": "^24.9.0",
+    "jsdoc-to-markdown": "^5.0.1"
   }
 }

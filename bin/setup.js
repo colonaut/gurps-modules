@@ -2,6 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 
+//TODO: update to webpack-dev-server and give ports in webpack-dev-server a number in packageJson (--port 4001, 4002...)
+
 //workers
 const packageJson = (pkg_info, callback) => {
     const pkg_file_path = path.join(pkg_info.path, 'package.json');
@@ -11,7 +13,7 @@ const packageJson = (pkg_info, callback) => {
 
     try {
         const devDependencies = {};
-        ['cross-env', 'jsdoc-to-markdown', 'jest'].reduce((acc, v) => {
+        ['cross-env', 'jsdoc-to-markdown', 'jest', 'webpack-dev-server'].reduce((acc, v) => {
             if (root_pkg_file.devDependencies[v])
                 return Object.assign(acc, {
                     [v]: root_pkg_file.devDependencies[v]
